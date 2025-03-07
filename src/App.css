@@ -114,3 +114,7 @@
 .play-pause {
   transition: all 0.3s ease;
 }
+
+.cursor-pointer {
+  cursor: pointer;
+}

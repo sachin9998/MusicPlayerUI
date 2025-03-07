@@ -21,7 +21,8 @@ function App() {
 
   // Current Data
   const [currentAlbum, setCurrentAlbum] = useState(allSongs);
-  const [currentSong, setCurrentSong] = useState(dummyData[9]);
+  const [songIndex, setSongIndex] = useState(0);
+  const [currentSong, setCurrentSong] = useState(currentAlbum[songIndex]);
 
   // Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -44,6 +45,18 @@ function App() {
     setIsMuted(!isMuted);
     audioRef.current.muted = !isMuted;
   };
+
+  const playNext = () => {
+    setSongIndex((prev) => (prev = (prev + 1) % currentAlbum.length));
+    setCurrentSong(currentAlbum[songIndex]);
+
+    // Update audio source and play
+    audioRef.current.src = currentSong.musicUrl;
+    audioRef.current.play();
+    setIsPlaying(true);
+  };
+
+  const playPrev = () => {};
 
   return (
     <div className="bg-black text-white vw-100 vh-100">
@@ -174,7 +187,7 @@ function App() {
                     )}
                   </div>
 
-                  <div>
+                  <div className="cursor-pointer" onClick={playNext}>
                     <TbPlayerTrackNextFilled size={20} className="grey-color" />
                   </div>
                 </div>
