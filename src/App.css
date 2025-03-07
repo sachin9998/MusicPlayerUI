@@ -10,3 +10,18 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* Navbar */
+.nav-bar {
+  width: 250px;
+  border: 1px solid red;
+}
+
+.nav-links {
+  font-family: "Basier Circle", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 32px;
+  letter-spacing: 0; /* No need for '%' — use '0' */
+  color: rgba(255, 255, 255, 1);
+}
