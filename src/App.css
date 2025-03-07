@@ -14,7 +14,7 @@
 /* Navbar */
 .nav-bar {
   width: 250px;
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }
 
 .nav-links {
@@ -24,4 +24,45 @@
   line-height: 32px;
   letter-spacing: 0; /* No need for '%' — use '0' */
   color: rgba(255, 255, 255, 1);
+}
+
+/* Input Styling */
+.input-search {
+  outline: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+}
+
+.input-search::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.grey-color {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Card Styling */
+.artist-title {
+  font-size: 12px;
+}
+
+/* Song List */
+#songs-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.song-card {
+  transition: all 0.3s ease;
+}
+
+.song-card:hover {
+  /* background-color: rgba(255, 255, 255, 0.5); */
+  background-color: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+/* Song Player */
+#song-player {
+  width: 500px;
 }
