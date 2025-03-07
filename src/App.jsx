@@ -1,21 +1,53 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // Icons
+import { BsThreeDots } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
 import { FaRegHeart } from "react-icons/fa";
-import { FaPlay } from "react-icons/fa6";
-import { IoVolumeMedium } from "react-icons/io5";
+import { FaCirclePause, FaCirclePlay } from "react-icons/fa6";
+import { IoVolumeMedium, IoVolumeMute } from "react-icons/io5";
 import {
   TbPlayerTrackNextFilled,
   TbPlayerTrackPrevFilled,
 } from "react-icons/tb";
-import { BsThreeDots } from "react-icons/bs";
 import "./App.css";
+import ProgressBar from "./components/ProgressBar";
+
+import { dummyData } from "./dummyData";
 
 function App() {
+  // Importing all songs data
+  const allSongs = dummyData;
+
+  // Current Data
+  const [currentAlbum, setCurrentAlbum] = useState(allSongs);
+  const [currentSong, setCurrentSong] = useState(dummyData[9]);
+
+  // Player States
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  // console.log(allSongs.length);
+
+  const audioRef = useRef(new Audio(currentSong.musicUrl));
+
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    audioRef.current.muted = !isMuted;
+  };
+
   return (
     <div className="bg-black text-white vw-100 vh-100">
-      <main className="p-4 d-flex">
+      <main className="p-4 d-flex gap-5">
         <nav className="nav-bar">
           <div>
             <img src="/Logo.svg" alt="" />
@@ -56,45 +88,32 @@ function App() {
               height: "calc(100vh - 2 * 1.5rem - 2rem - 2.5rem - 3rem)",
             }}
           >
-            {/* Single Card */}
-            <div className="d-flex justify-content-between align-items-center p-3 song-card">
-              <div className="d-flex gap-2">
-                <div>
-                  <img src="/image 4.png" alt="" />
-                </div>
+            {/* Song Cards */}
 
-                <div className="d-flex flex-column align-items-start">
-                  <span className="">Starboy</span>
-                  <span className="artist-title grey-color">The Weeknd</span>
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <p className="mb-0 grey-color">4:16</p>
-              </div>
-            </div>
-
-            {/* Second Card */}
-
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, index) => {
+            {allSongs.map((item, index) => {
               return (
                 <div
-                  key={item}
+                  key={item.title}
                   className="d-flex justify-content-between align-items-center p-3 song-card"
                 >
                   <div className="d-flex gap-2">
-                    <div>
-                      <img src="/image 4.png" alt="" />
+                    <div className="artist-logo">
+                      <img
+                        className="artist-logo-img"
+                        src={item.artistImage || "/public/image 4.png"}
+                        alt=""
+                      />
                     </div>
 
                     <div className="d-flex flex-column align-items-start">
-                      <span className="">Starboy</span>
+                      <span className="">{item.title}</span>
                       <span className="artist-title grey-color">
-                        The Weeknd
+                        {item.artistName}
                       </span>
                     </div>
                   </div>
                   <div className="d-flex align-items-center">
-                    <p className="mb-0 grey-color">4:16</p>
+                    <p className="mb-0 grey-color">{item.duration}</p>
                   </div>
                 </div>
               );
@@ -103,41 +122,71 @@ function App() {
         </div>
 
         {/* Songs Player */}
-        <section className="w-50">
-          <div className="mx-auto p-5" id="song-player">
-            {/* Song Info */}
-            <div className="d-flex justify-content-between">
-              <div className="d-flex flex-column gap-1">
-                <span className="fs-3">Viva La Vida</span>
-                <span className="artist-title grey-color">Coldplay</span>
-              </div>
-
-              <div className="d-flex align-items-center">
-                <FaRegHeart size={20} />
-              </div>
-            </div>
-
-            <div>
-              <img src="" alt="" />
-            </div>
-
-            <div>
-              <div></div>
-              <div>
-                <div>
-                  <TbPlayerTrackPrevFilled />
+        <section className="flex-grow-1 d-flex justify-content-center align-items-center">
+          <div id="songPlayer">
+            <div className="h-100 d-flex flex-column gap-5" id="song-player">
+              {/* Song Info */}
+              <div className="d-flex justify-content-between">
+                <div className="d-flex flex-column gap-1">
+                  <span className="fs-3 fw-bold">{currentSong.title}</span>
+                  <span className="artist-title grey-color">
+                    {currentSong.artistName}
+                  </span>
                 </div>
 
-                <div>
-                  <FaPlay />
-                </div>
-
-                <div>
-                  <TbPlayerTrackNextFilled />
+                <div className="d-flex align-items-center">
+                  <FaRegHeart size={20} />
                 </div>
               </div>
-              <div className="circle">
-                <IoVolumeMedium />
+
+              <div className="w-100 d-flex flex-column gap-4">
+                <img
+                  className="song-cover"
+                  src={currentSong.thumbnail}
+                  alt=""
+                />
+
+                {/* Progress Bar */}
+                <ProgressBar value={50} />
+              </div>
+
+              {/* Player Controls */}
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="circle">
+                  <BsThreeDots />
+                </div>
+
+                {/* Prev, Stop, Next */}
+                <div className="d-flex gap-5">
+                  <div>
+                    <TbPlayerTrackPrevFilled size={20} className="grey-color" />
+                  </div>
+
+                  <div
+                    onClick={togglePlayPause}
+                    className=""
+                    style={{ cursor: "pointer" }}
+                  >
+                    {isPlaying ? (
+                      <FaCirclePause className="" size={36} />
+                    ) : (
+                      <FaCirclePlay size={36} className="" />
+                    )}
+                  </div>
+
+                  <div>
+                    <TbPlayerTrackNextFilled size={20} className="grey-color" />
+                  </div>
+                </div>
+
+                {/* Volume */}
+                <div className="circle" onClick={toggleMute}>
+                  {isMuted ? (
+                    <IoVolumeMute size={20} />
+                  ) : (
+                    <IoVolumeMedium size={20} />
+                  )}
+                </div>
               </div>
             </div>
           </div>

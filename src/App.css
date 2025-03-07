@@ -47,6 +47,16 @@
   font-size: 12px;
 }
 
+.artist-logo {
+  border-radius: 50%;
+}
+
+.artist-logo-img {
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
+}
+
 /* Song List */
 #songs-list::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
@@ -63,6 +73,44 @@
 }
 
 /* Song Player */
-#song-player {
-  width: 500px;
+#songPlayer {
+  max-width: 480px;
+  /* max-height: fit-content; */
+}
+
+.song-cover {
+  width: 480px;
+  max-height: 400px;
+  object-fit: contain;
+  /* height: 480px; */
+}
+
+/* Progress Bar */
+.progress {
+  width: 100%;
+  height: 6px;
+  color: white;
+  text-align: center;
+  background: black;
+  border-radius: 20px;
+  /* border: 1px solid black; */
+}
+
+.circle {
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-dark {
+  background: white;
+}
+
+.play-pause {
+  transition: all 0.3s ease;
 }
