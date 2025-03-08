@@ -187,3 +187,8 @@ body {
 .search-input {
   opacity: 0.8;
 }
+
+/* Mobile version css */
+.mobile-cover {
+  max-width: 75vw;
+}

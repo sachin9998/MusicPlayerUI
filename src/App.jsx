@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 // Icons
+import ColorThief from "colorthief";
+import { FiMenu } from "react-icons/fi";
+import "./App.css";
+import ProgressBar from "./components/ProgressBar";
+import { dummyData } from "./dummyData";
 import {
   BiPhotoAlbum,
   BsThreeDots,
@@ -15,11 +20,6 @@ import {
   TbPlayerTrackNextFilled,
   TbPlayerTrackPrevFilled,
 } from "./icons";
-
-import ColorThief from "colorthief";
-import "./App.css";
-import ProgressBar from "./components/ProgressBar";
-import { dummyData } from "./dummyData";
 
 function App() {
   const allSongs = dummyData;
@@ -349,7 +349,7 @@ function App() {
         minHeight: "100vh",
       }}
     >
-      <main className="p-4 d-flex gap-5">
+      <main className="p-4 d-flex gap-5 d-none d-md-flex">
         <nav className="nav-bar">
           <div>
             <img src="/Logo.svg" alt="" />
@@ -611,6 +611,195 @@ function App() {
           </div>
         </section>
       </main>
+
+      {/* Mobile Version starts heree.... */}
+      <div className="d-block d-md-none">
+        <nav className="w-100 d-flex justify-content-between align-items-center p-4">
+          <div>
+            <img src="/Logo.svg" alt="" />
+          </div>
+
+          <div>
+            <FiMenu className="cursor-pointer" />
+            {/* <MdClose className="grey-color" size={18} /> */}
+          </div>
+
+          {/* <div>
+            <ul className="d-flex flex-column gap-3 list-unstyled nav-links mt-4 cursor-pointer">
+              <li
+                id="all-songs"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "all-songs" ? "text-white" : "inactive-link"
+                }
+              >
+                For You
+              </li>
+              <li
+                id="top"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "top" ? "text-white" : "inactive-link"
+                }
+              >
+                Top Tracks
+              </li>
+              <li
+                id="favourites"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "favourites" ? "text-white" : "inactive-link"
+                }
+              >
+                Favourites
+              </li>
+              <li
+                id="recents"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "recents" ? "text-white" : "inactive-link"
+                }
+              >
+                Recently Played
+              </li>
+            </ul>
+          </div> */}
+        </nav>
+
+        {/* Music Player */}
+        {/* Song title and fav button */}
+        <div className="d-flex justify-content-between px-4 py-0">
+          <div className="d-flex flex-column gap-1">
+            <span className="fs-3 fw-bold">{currentSong.title}</span>
+            <span className="artist-title grey-color">
+              {currentSong.artistName}
+            </span>
+          </div>
+
+          <div className="d-flex align-items-center">
+            {favouriteSongs.some((song) => song.title === currentSong.title) ? (
+              <FaHeart
+                className="cursor-pointer text-danger"
+                size={20}
+                onClick={() => handleFavouriteClick(currentSong)}
+                style={{ color: "#dc3545" }} // Dark red color
+              />
+            ) : (
+              <FaRegHeart
+                className="cursor-pointer"
+                size={20}
+                onClick={() => handleFavouriteClick(currentSong)}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Song thumbnail and progress bar */}
+        <div className="d-flex align-items-center flex-column gap-4 p-4">
+          <img className="mobile-cover" src={currentSong.thumbnail} alt="" />
+          {/* Progress Bar */}
+          <ProgressBar value={progress} />
+        </div>
+
+        {/* Player controls */}
+        <div className="d-flex justify-content-between align-items-center px-4">
+          {/* Three dot context menu */}
+          <div
+            className="circle position-relative"
+            onClick={handleThreeDotsClick}
+          >
+            <BsThreeDots />
+          </div>
+
+          {isMenuOpen && (
+            <div
+              className="context-menu bg-dark p-2 rounded-2 shadow"
+              style={{
+                position: "fixed",
+                top: menuPosition.top,
+                left: menuPosition.left,
+                minWidth: "160px",
+                zIndex: 1000,
+              }}
+            >
+              <ul className="list-unstyled d-flex flex-column gap-2 m-0">
+                <li
+                  className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                  onClick={() => {
+                    handleFavouriteClick(currentSong);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  {favouriteSongs.some(
+                    (song) => song.title === currentSong.title
+                  ) ? (
+                    <>
+                      <FaHeart className="text-danger" size={16} />
+                      <span>Remove from Favorites</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaRegHeart size={16} />
+                      <span>Add to Favorites</span>
+                    </>
+                  )}
+                </li>
+                <li
+                  className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                  onClick={() => {
+                    // Handle Report Error
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <BiPhotoAlbum size={16} />
+                  <span>Go to Album</span>
+                </li>
+                <li
+                  className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                  onClick={() => {
+                    // Handle Go to Album
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <MdOutlineBugReport size={16} />
+                  <span>Report Error</span>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Prev, Stop, Next */}
+          <div className="d-flex gap-5">
+            <div className="cursor-pointer" onClick={playPrev}>
+              <TbPlayerTrackPrevFilled size={20} className="grey-color" />
+            </div>
+
+            <div
+              onClick={togglePlayPause}
+              className=""
+              style={{ cursor: "pointer" }}
+            >
+              {isPlaying ? (
+                <FaCirclePause className="" size={36} />
+              ) : (
+                <FaCirclePlay size={36} className="" />
+              )}
+            </div>
+
+            <div className="cursor-pointer" onClick={playNext}>
+              <TbPlayerTrackNextFilled size={20} className="grey-color" />
+            </div>
+          </div>
+          {/* Volume */}
+          <div className="circle cursor-pointer" onClick={toggleMute}>
+            {isMuted ? (
+              <IoVolumeMute size={20} />
+            ) : (
+              <IoVolumeMedium size={20} />
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
