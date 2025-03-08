@@ -25,13 +25,24 @@ function App() {
   const allSongs = dummyData;
   const [currentAlbum, setCurrentAlbum] = useState(allSongs);
   const [songIndex, setSongIndex] = useState(0);
+
+  // Current Playing Songs ===>
   const [currentSong, setCurrentSong] = useState(currentAlbum[songIndex]);
+
+  // song playing status
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [progress, setProgress] = useState(1);
+
+  // Progress tracker ==>
+  const [progress, setProgress] = useState(0);
+
+  // Favourite Songs List ===>
   const [favouriteSongs, setFavouriteSongs] = useState([]);
+
+  // Recently Played songs list ===>
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
 
+  // AUDIO PLAYER REF
   const audioRef = useRef(new Audio(currentSong.musicUrl));
 
   const [audioElement, setAudioElement] = useState(null);
@@ -71,7 +82,7 @@ function App() {
     };
   }, [currentSong]); // Only recreate when song changes
 
-  // 2. Update the togglePlayPause function
+  // PLay/ PAuse button setting ===>
   const togglePlayPause = () => {
     if (!audioElement) return;
 
@@ -83,7 +94,7 @@ function App() {
     setIsPlaying(!isPlaying);
   };
 
-  // 3. Update the mute toggle
+  // Mute button setting ===>
   const toggleMute = () => {
     if (!audioElement) return;
     const newMutedState = !isMuted;
@@ -98,11 +109,13 @@ function App() {
     }
   };
 
+  // ===> Play next song from list
   const playNext = () => {
     const newIndex = (songIndex + 1) % currentAlbum.length;
     changeSong(newIndex);
   };
 
+  // ===> Play previous song from list
   const playPrev = () => {
     const newIndex =
       (songIndex - 1 + currentAlbum.length) % currentAlbum.length;
@@ -116,6 +129,8 @@ function App() {
   };
 
   const [activeMenu, setActiveMenu] = useState("all-songs");
+
+  // PLay song from Menu Card or Songs Card List
   const handleMenuClicks = (e) => {
     const menuId = e.target.id;
     setActiveMenu(menuId);
@@ -166,11 +181,11 @@ function App() {
     }
   }, []);
 
-  // Context Menu options ---->
+  // Context Menu ---->
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-  // Add this handler function
+  // Three Dots context Menu Handler ===>
   const handleThreeDotsClick = (e) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -181,7 +196,7 @@ function App() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Add this effect to close menu when clicking outside
+  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(".context-menu")) {
@@ -192,8 +207,7 @@ function App() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Recently Played CODE
-  // Add this to load initial state from sessionStorage
+  // ===>> load recentlyPlayed from sessionStorage
   useEffect(() => {
     const storedRecents = sessionStorage.getItem("recentlyPlayed");
     if (storedRecents) {
@@ -207,8 +221,10 @@ function App() {
       setRecentlyPlayed((prev) => {
         // Remove the song if it already exists
         const filtered = prev.filter((song) => song.id !== currentSong.id);
+
         // Add current song to beginning of array
         const updated = [currentSong, ...filtered];
+
         // Keep only first 10 items
         const limited = updated.slice(0, 10);
 
@@ -225,9 +241,8 @@ function App() {
     }
   }, [currentSong, isPlaying]);
 
-  // Remove the previous localStorage useEffect and replace with this
+  // Set Recently Played songs
   useEffect(() => {
-    // This ensures sync between tabs while the session is active
     const handleStorageChange = (e) => {
       if (e.key === "recentlyPlayed") {
         setRecentlyPlayed(JSON.parse(e.newValue));
@@ -242,6 +257,7 @@ function App() {
   const [searchInput, setSearchInput] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
+  // Search Handler Function
   const handleSearch = (e) => {
     const input = e.target.value;
     setSearchInput(input);
@@ -259,6 +275,7 @@ function App() {
     }
   };
 
+  // ===> Closing Search Input
   const handleClose = () => {
     setSearchInput("");
     setIsSearching(false);
@@ -285,13 +302,12 @@ function App() {
     // setIsSearching(false);
   };
 
-  // Handling background change
-  // Add this state at the top of your component
+  // Background color state
   const [backgroundGradient, setBackgroundGradient] = useState(
     "linear-gradient(45deg, #121212 0%, #000000 100%)"
   );
 
-  // Add this useEffect to handle background changes
+  // Update Background Color
   useEffect(() => {
     const updateBackground = async () => {
       const img = new Image();
@@ -392,7 +408,6 @@ function App() {
               type="text"
               className="border-0 bg-dark w-100 input-search"
               placeholder="Search Song, Artist"
-              // className="form-control border-0 bg-transparent me-2"
             />
 
             {isSearching ? (
@@ -464,14 +479,6 @@ function App() {
                   </span>
                 </div>
 
-                {/* <div className="d-flex align-items-center">
-                  <FaRegHeart
-                    className="cursor-pointer"
-                    size={20}
-                    onClick={() => handleFavouriteClick(currentSong)}
-                  />
-                </div> */}
-
                 <div className="d-flex align-items-center">
                   {favouriteSongs.some(
                     (song) => song.title === currentSong.title
@@ -499,11 +506,7 @@ function App() {
                   alt=""
                 />
                 {/* Progress Bar */}
-                <ProgressBar
-                  value={progress}
-                  currentTime={audioElement?.currentTime || 0}
-                  duration={currentSong.durationInSeconds}
-                />
+                <ProgressBar value={progress} />
               </div>
 
               {/* Player Controls */}
