@@ -1,5 +1,6 @@
 export const dummyData = [
   {
+    id: 101,
     title: "Deva Deva",
     playCount: 190343,
     thumbnail:
@@ -14,12 +15,13 @@ export const dummyData = [
   },
 
   {
+    id: 102,
     title: "Aaya Re Toofan",
     playCount: 7843,
-    thumbnail: "/Cover/Chhaava.jpg",
-    // musicUrl: "/Songs/Beautiful.mp3",
-    musicUrl:
+    thumbnail:
       "https://c.saavncdn.com/509/Chhaava-Hindi-2025-20250213193448-500x500.jpg",
+    musicUrl:
+      "https://pagalfree.com/musics/128-Aaya%20Re%20Toofan%20-%20Chhaava%20128%20Kbps.mp3",
     artistName: "A.R. Rahman",
     artistImage:
       "https://c.saavncdn.com/artists/AR_Rahman_002_20210120084455_500x500.jpg",
@@ -27,6 +29,7 @@ export const dummyData = [
     durationInSeconds: 279,
   },
   {
+    id: 103,
     title: "Gori Hai Kalaiyan",
     playCount: 6,
     thumbnail:
@@ -41,8 +44,9 @@ export const dummyData = [
   },
 
   {
+    id: 104,
     title: "Lashkare",
-    playCount: 8345,
+    playCount: 3345,
     thumbnail:
       "https://c.saavncdn.com/443/Lashkare-Punjabi-2023-20230206183109-500x500.jpg",
     musicUrl:
@@ -55,8 +59,9 @@ export const dummyData = [
   },
 
   {
+    id: 105,
     title: "Kissik",
-    playCount: 43723,
+    playCount: 23723,
     thumbnail:
       "https://c.saavncdn.com/306/Pushpa-2-The-Rule-Hindi-2024-20241205211002-500x500.jpg",
     musicUrl:
@@ -69,6 +74,7 @@ export const dummyData = [
   },
 
   {
+    id: 106,
     title: "Zaalim",
     playCount: 1454,
     thumbnail:
@@ -83,6 +89,7 @@ export const dummyData = [
   },
 
   {
+    id: 107,
     title: "O Mahi",
     playCount: 8323,
     thumbnail:
@@ -97,6 +104,7 @@ export const dummyData = [
   },
 
   {
+    id: 108,
     title: "Mere Dholna 3.0",
     playCount: 1854,
     thumbnail:
@@ -110,6 +118,7 @@ export const dummyData = [
   },
 
   {
+    id: 109,
     title: "Aaj Ki Raat",
     playCount: 14363,
     thumbnail:
@@ -124,11 +133,13 @@ export const dummyData = [
   },
 
   {
+    id: 110,
     title: "Jaane Tu",
     playCount: 340,
-    thumbnail: "/Cover/Chhaava.jpg",
-    musicUrl:
+    thumbnail:
       "https://c.saavncdn.com/509/Chhaava-Hindi-2025-20250213193448-500x500.jpg",
+    musicUrl:
+      "https://pagalfree.com/musics/128-Jaane%20Tu%20-%20Chhaava%20128%20Kbps.mp3",
     artistName: "A.R. Rahman",
     artistImage:
       "https://c.saavncdn.com/artists/AR_Rahman_002_20210120084455_500x500.jpg",
@@ -137,8 +148,9 @@ export const dummyData = [
   },
 
   {
+    id: 111,
     title: "Apna Bana Le",
-    playCount: 6676,
+    playCount: 2276,
     thumbnail:
       "https://c.saavncdn.com/815/Bhediya-Hindi-2023-20230927155213-500x500.jpg",
     musicUrl:
@@ -151,6 +163,7 @@ export const dummyData = [
   },
 
   {
+    id: 112,
     title: "Angaaron",
     playCount: 233,
     thumbnail:
@@ -164,6 +177,7 @@ export const dummyData = [
     durationInSeconds: 260,
   },
   {
+    id: 113,
     title: "Hauli Hauli",
     playCount: 62,
     thumbnail:
@@ -177,6 +191,7 @@ export const dummyData = [
   },
 
   {
+    id: 114,
     title: "Ishq Mein",
     playCount: 133,
     thumbnail:
@@ -191,6 +206,7 @@ export const dummyData = [
   },
 
   {
+    id: 115,
     title: "Lutt Putt Gaya",
     playCount: 4923,
     thumbnail:
@@ -205,6 +221,7 @@ export const dummyData = [
   },
 
   {
+    id: 116,
     title: "Genda Phool",
     playCount: 700,
     thumbnail:
@@ -219,8 +236,9 @@ export const dummyData = [
   },
 
   {
+    id: 117,
     title: "Rabba Mereya",
-    playCount: 6654,
+    playCount: 3454,
     thumbnail:
       "https://c.saavncdn.com/749/Rabba-Mereya-From-Jatt-Nuu-Chudail-Takri-Punjabi-2024-20240315161216-500x500.jpg",
     musicUrl:
@@ -233,6 +251,7 @@ export const dummyData = [
   },
 
   {
+    id: 118,
     title: "Agar Ho Tum",
     playCount: 85,
     thumbnail:
@@ -246,6 +265,7 @@ export const dummyData = [
     durationInSeconds: 253,
   },
   {
+    id: 119,
     title: "Pushpa Pushpa",
     playCount: 11235,
     thumbnail:
@@ -260,6 +280,7 @@ export const dummyData = [
   },
 
   {
+    id: 120,
     title: "Tu Hai Champion",
     playCount: 457,
     thumbnail:

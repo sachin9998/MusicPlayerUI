@@ -1,65 +1,338 @@
-import { useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 // Icons
-import { BsThreeDots } from "react-icons/bs";
-import { CiSearch } from "react-icons/ci";
-import { FaRegHeart } from "react-icons/fa";
-import { FaCirclePause, FaCirclePlay } from "react-icons/fa6";
-import { IoVolumeMedium, IoVolumeMute } from "react-icons/io5";
 import {
+  BiPhotoAlbum,
+  BsThreeDots,
+  CiSearch,
+  FaCirclePause,
+  FaCirclePlay,
+  FaHeart,
+  FaRegHeart,
+  IoVolumeMedium,
+  IoVolumeMute,
+  MdClose,
+  MdOutlineBugReport,
   TbPlayerTrackNextFilled,
   TbPlayerTrackPrevFilled,
-} from "react-icons/tb";
+} from "./icons";
+
+import ColorThief from "colorthief";
 import "./App.css";
 import ProgressBar from "./components/ProgressBar";
-
 import { dummyData } from "./dummyData";
 
 function App() {
-  // Importing all songs data
   const allSongs = dummyData;
-
-  // Current Data
   const [currentAlbum, setCurrentAlbum] = useState(allSongs);
   const [songIndex, setSongIndex] = useState(0);
   const [currentSong, setCurrentSong] = useState(currentAlbum[songIndex]);
-
-  // Player States
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-
-  // console.log(allSongs.length);
+  const [progress, setProgress] = useState(1);
+  const [favouriteSongs, setFavouriteSongs] = useState([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
 
   const audioRef = useRef(new Audio(currentSong.musicUrl));
 
-  const togglePlayPause = () => {
+  const [audioElement, setAudioElement] = useState(null);
+
+  useEffect(() => {
+    // Create new audio element
+    const newAudio = new Audio(currentSong.musicUrl);
+    newAudio.muted = isMuted;
+
+    const updateProgress = () => {
+      const duration = newAudio.duration || currentSong.durationInSeconds;
+      const currentTime = newAudio.currentTime;
+      const progressPercent = (currentTime / duration) * 100;
+      setProgress(progressPercent);
+    };
+
+    const handleEnded = playNext;
+
+    // Setup event listeners
+    newAudio.addEventListener("timeupdate", updateProgress);
+    newAudio.addEventListener("ended", handleEnded);
+
+    // Play/pause management
     if (isPlaying) {
-      audioRef.current.pause();
+      newAudio.play().catch(() => setIsPlaying(false));
+    }
+
+    // Save reference
+    audioRef.current = newAudio;
+    setAudioElement(newAudio);
+
+    // Cleanup function
+    return () => {
+      newAudio.pause();
+      newAudio.removeEventListener("timeupdate", updateProgress);
+      newAudio.removeEventListener("ended", handleEnded);
+    };
+  }, [currentSong]); // Only recreate when song changes
+
+  // 2. Update the togglePlayPause function
+  const togglePlayPause = () => {
+    if (!audioElement) return;
+
+    if (isPlaying) {
+      audioElement.pause();
     } else {
-      audioRef.current.play();
+      audioElement.play().catch(() => setIsPlaying(false));
     }
     setIsPlaying(!isPlaying);
   };
 
+  // 3. Update the mute toggle
   const toggleMute = () => {
-    setIsMuted(!isMuted);
-    audioRef.current.muted = !isMuted;
+    if (!audioElement) return;
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    audioElement.muted = newMutedState;
+  };
+
+  const changeSong = (newIndex) => {
+    if (newIndex >= 0 && newIndex < currentAlbum.length) {
+      setSongIndex(newIndex);
+      setCurrentSong(currentAlbum[newIndex]);
+    }
   };
 
   const playNext = () => {
-    setSongIndex((prev) => (prev = (prev + 1) % currentAlbum.length));
-    setCurrentSong(currentAlbum[songIndex]);
-
-    // Update audio source and play
-    audioRef.current.src = currentSong.musicUrl;
-    audioRef.current.play();
-    setIsPlaying(true);
+    const newIndex = (songIndex + 1) % currentAlbum.length;
+    changeSong(newIndex);
   };
 
-  const playPrev = () => {};
+  const playPrev = () => {
+    const newIndex =
+      (songIndex - 1 + currentAlbum.length) % currentAlbum.length;
+    changeSong(newIndex);
+  };
+
+  // song selection from list
+  const handleSongSelect = (index) => {
+    changeSong(index);
+    if (!isPlaying) togglePlayPause();
+  };
+
+  const [activeMenu, setActiveMenu] = useState("all-songs");
+  const handleMenuClicks = (e) => {
+    const menuId = e.target.id;
+    setActiveMenu(menuId);
+
+    if (menuId === "all-songs") {
+      setCurrentAlbum(allSongs);
+    } else if (menuId === "top") {
+      const newAlbum = allSongs.filter((song) => song.playCount > 5000);
+      setCurrentAlbum(newAlbum);
+    } else if (menuId === "favourites") {
+      setCurrentAlbum(favouriteSongs);
+    } else if (menuId === "recents") {
+      setCurrentAlbum(recentlyPlayed);
+    }
+  };
+
+  // Handle Favourite Clicks
+  const handleFavouriteClick = (song) => {
+    setFavouriteSongs((prevFavourites) => {
+      const isAlreadyFavourite = prevFavourites.some(
+        (fav) => fav.title === song.title
+      );
+
+      let updatedFavourites;
+
+      if (isAlreadyFavourite) {
+        // Remove from favourites if already there
+        updatedFavourites = prevFavourites.filter(
+          (fav) => fav.title !== song.title
+        );
+      } else {
+        // Add to favourites
+        updatedFavourites = [...prevFavourites, song];
+      }
+
+      // Save updated favourites to localStorage
+      localStorage.setItem("favouriteSongs", JSON.stringify(updatedFavourites));
+
+      return updatedFavourites;
+    });
+  };
+
+  // Load favourites from localStorage on app start
+  useEffect(() => {
+    const storedFavourites = localStorage.getItem("favouriteSongs");
+    if (storedFavourites) {
+      setFavouriteSongs(JSON.parse(storedFavourites));
+    }
+  }, []);
+
+  // Context Menu options ---->
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+  // Add this handler function
+  const handleThreeDotsClick = (e) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.top - 140,
+      left: rect.left,
+    });
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Add this effect to close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".context-menu")) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Recently Played CODE
+  // Add this to load initial state from sessionStorage
+  useEffect(() => {
+    const storedRecents = sessionStorage.getItem("recentlyPlayed");
+    if (storedRecents) {
+      setRecentlyPlayed(JSON.parse(storedRecents));
+    }
+  }, []);
+
+  // Update recetly played
+  useEffect(() => {
+    const updateRecentlyPlayed = () => {
+      setRecentlyPlayed((prev) => {
+        // Remove the song if it already exists
+        const filtered = prev.filter((song) => song.id !== currentSong.id);
+        // Add current song to beginning of array
+        const updated = [currentSong, ...filtered];
+        // Keep only first 10 items
+        const limited = updated.slice(0, 10);
+
+        // Save to sessionStorage
+        sessionStorage.setItem("recentlyPlayed", JSON.stringify(limited));
+
+        return limited;
+      });
+    };
+
+    // Only update if currentSong exists and is playing
+    if (currentSong && isPlaying) {
+      updateRecentlyPlayed();
+    }
+  }, [currentSong, isPlaying]);
+
+  // Remove the previous localStorage useEffect and replace with this
+  useEffect(() => {
+    // This ensures sync between tabs while the session is active
+    const handleStorageChange = (e) => {
+      if (e.key === "recentlyPlayed") {
+        setRecentlyPlayed(JSON.parse(e.newValue));
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // ADDING SEARCH FUNCTIONALITY
+  const [searchInput, setSearchInput] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = (e) => {
+    const input = e.target.value;
+    setSearchInput(input);
+
+    if (input.trim()) {
+      setIsSearching(true);
+      const filteredSongs = allSongs.filter(
+        (song) =>
+          song.title.toLowerCase().includes(input.toLowerCase()) ||
+          song.artistName.toLowerCase().includes(input.toLowerCase())
+      );
+      setCurrentAlbum(filteredSongs);
+    } else {
+      handleClose();
+    }
+  };
+
+  const handleClose = () => {
+    setSearchInput("");
+    setIsSearching(false);
+
+    // Reset to current active menu's list
+    switch (activeMenu) {
+      case "all-songs":
+        setCurrentAlbum(allSongs);
+        break;
+      case "top":
+        setCurrentAlbum(allSongs.filter((song) => song.playCount > 5000));
+        break;
+      case "favourites":
+        setCurrentAlbum(favouriteSongs);
+        break;
+      case "recents":
+        setCurrentAlbum(recentlyPlayed);
+        break;
+      default:
+        setCurrentAlbum(allSongs);
+    }
+
+    // setCurrentAlbum(allSongs);
+    // setIsSearching(false);
+  };
+
+  // Handling background change
+  // Add this state at the top of your component
+  const [backgroundGradient, setBackgroundGradient] = useState(
+    "linear-gradient(45deg, #121212 0%, #000000 100%)"
+  );
+
+  // Add this useEffect to handle background changes
+  useEffect(() => {
+    const updateBackground = async () => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = currentSong.thumbnail;
+
+      img.onload = () => {
+        const colorThief = new ColorThief();
+        try {
+          const [color1, color2] = colorThief.getPalette(img, 2);
+          const gradient = `linear-gradient(45deg, rgb(${color1.join(
+            ","
+          )}) 0%, rgb(${color2.join(",")}) 100%)`;
+          setBackgroundGradient(gradient);
+        } catch (error) {
+          console.error("Error extracting colors:", error);
+          setBackgroundGradient(
+            "linear-gradient(45deg, #121212 0%, #000000 100%)"
+          );
+        }
+      };
+
+      img.onerror = () => {
+        setBackgroundGradient(
+          "linear-gradient(45deg, #121212 0%, #000000 100%)"
+        );
+      };
+    };
+
+    updateBackground();
+  }, [currentSong]);
 
   return (
-    <div className="bg-black text-white vw-100 vh-100">
+    <div
+      className="bg-black text-white vw-100 vh-100"
+      style={{
+        background: backgroundGradient,
+        transition: "background 1s ease",
+        minHeight: "100vh",
+      }}
+    >
       <main className="p-4 d-flex gap-5">
         <nav className="nav-bar">
           <div>
@@ -67,11 +340,43 @@ function App() {
           </div>
 
           <div>
-            <ul className="d-flex flex-column gap-3 list-unstyled nav-links mt-4">
-              <li>For You</li>
-              <li>Top Tracks</li>
-              <li>Favourites</li>
-              <li>Recently Played</li>
+            <ul className="d-flex flex-column gap-3 list-unstyled nav-links mt-4 cursor-pointer">
+              <li
+                id="all-songs"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "all-songs" ? "text-white" : "inactive-link"
+                }
+              >
+                For You
+              </li>
+              <li
+                id="top"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "top" ? "text-white" : "inactive-link"
+                }
+              >
+                Top Tracks
+              </li>
+              <li
+                id="favourites"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "favourites" ? "text-white" : "inactive-link"
+                }
+              >
+                Favourites
+              </li>
+              <li
+                id="recents"
+                onClick={handleMenuClicks}
+                className={
+                  activeMenu === "recents" ? "text-white" : "inactive-link"
+                }
+              >
+                Recently Played
+              </li>
             </ul>
           </div>
         </nav>
@@ -80,17 +385,21 @@ function App() {
           <h2 className="fs-2 fw-bold">For You</h2>
 
           {/* Search Input */}
-          <div className="d-flex align-items-center bg-dark border-0 px-2 py-1 rounded-1">
+          <div className="d-flex align-items-center bg-dark border-0 px-2 py-1 rounded-1 search-input">
             <input
-              // value={value}
-              // onChange={onChange}
+              value={searchInput}
+              onChange={handleSearch}
               type="text"
               className="border-0 bg-dark w-100 input-search"
               placeholder="Search Song, Artist"
               // className="form-control border-0 bg-transparent me-2"
             />
 
-            <CiSearch className="grey-color" size={18} />
+            {isSearching ? (
+              <MdClose className="grey-color" size={18} onClick={handleClose} />
+            ) : (
+              <CiSearch className="grey-color" size={18} />
+            )}
           </div>
 
           {/* Songs section */}
@@ -103,11 +412,18 @@ function App() {
           >
             {/* Song Cards */}
 
-            {allSongs.map((item, index) => {
-              return (
+            {currentAlbum.length === 0 ? (
+              <div className="text-center text-white mt-5">
+                <p>No Songs Found</p>
+              </div>
+            ) : (
+              currentAlbum.map((item, index) => (
                 <div
-                  key={item.title}
-                  className="d-flex justify-content-between align-items-center p-3 song-card"
+                  key={item.id}
+                  className={`d-flex justify-content-between align-items-center p-3 song-card ${
+                    item.id === currentSong.id ? "active-song" : ""
+                  }`}
+                  onClick={() => handleSongSelect(index)}
                 >
                   <div className="d-flex gap-2">
                     <div className="artist-logo">
@@ -115,6 +431,7 @@ function App() {
                         className="artist-logo-img"
                         src={item.artistImage || "/public/image 4.png"}
                         alt=""
+                        crossOrigin="anonymous"
                       />
                     </div>
 
@@ -129,8 +446,8 @@ function App() {
                     <p className="mb-0 grey-color">{item.duration}</p>
                   </div>
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
         </div>
 
@@ -147,8 +464,31 @@ function App() {
                   </span>
                 </div>
 
+                {/* <div className="d-flex align-items-center">
+                  <FaRegHeart
+                    className="cursor-pointer"
+                    size={20}
+                    onClick={() => handleFavouriteClick(currentSong)}
+                  />
+                </div> */}
+
                 <div className="d-flex align-items-center">
-                  <FaRegHeart size={20} />
+                  {favouriteSongs.some(
+                    (song) => song.title === currentSong.title
+                  ) ? (
+                    <FaHeart
+                      className="cursor-pointer text-danger"
+                      size={20}
+                      onClick={() => handleFavouriteClick(currentSong)}
+                      style={{ color: "#dc3545" }} // Dark red color
+                    />
+                  ) : (
+                    <FaRegHeart
+                      className="cursor-pointer"
+                      size={20}
+                      onClick={() => handleFavouriteClick(currentSong)}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -158,20 +498,84 @@ function App() {
                   src={currentSong.thumbnail}
                   alt=""
                 />
-
                 {/* Progress Bar */}
-                <ProgressBar value={50} />
+                <ProgressBar
+                  value={progress}
+                  currentTime={audioElement?.currentTime || 0}
+                  duration={currentSong.durationInSeconds}
+                />
               </div>
 
               {/* Player Controls */}
               <div className="d-flex justify-content-between align-items-center">
-                <div className="circle">
+                {/* Three dot context menu */}
+                <div
+                  className="circle position-relative"
+                  onClick={handleThreeDotsClick}
+                >
                   <BsThreeDots />
                 </div>
 
+                {isMenuOpen && (
+                  <div
+                    className="context-menu bg-dark p-2 rounded-2 shadow"
+                    style={{
+                      position: "fixed",
+                      top: menuPosition.top,
+                      left: menuPosition.left,
+                      minWidth: "160px",
+                      zIndex: 1000,
+                    }}
+                  >
+                    <ul className="list-unstyled d-flex flex-column gap-2 m-0">
+                      <li
+                        className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                        onClick={() => {
+                          handleFavouriteClick(currentSong);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        {favouriteSongs.some(
+                          (song) => song.title === currentSong.title
+                        ) ? (
+                          <>
+                            <FaHeart className="text-danger" size={16} />
+                            <span>Remove from Favorites</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaRegHeart size={16} />
+                            <span>Add to Favorites</span>
+                          </>
+                        )}
+                      </li>
+                      <li
+                        className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                        onClick={() => {
+                          // Handle Report Error
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <BiPhotoAlbum size={16} />
+                        <span>Go to Album</span>
+                      </li>
+                      <li
+                        className="px-3 py-2 hover-bg-grey rounded-1 cursor-pointer d-flex align-items-center gap-2"
+                        onClick={() => {
+                          // Handle Go to Album
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <MdOutlineBugReport size={16} />
+                        <span>Report Error</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
                 {/* Prev, Stop, Next */}
                 <div className="d-flex gap-5">
-                  <div>
+                  <div className="cursor-pointer" onClick={playPrev}>
                     <TbPlayerTrackPrevFilled size={20} className="grey-color" />
                   </div>
 
@@ -191,9 +595,8 @@ function App() {
                     <TbPlayerTrackNextFilled size={20} className="grey-color" />
                   </div>
                 </div>
-
                 {/* Volume */}
-                <div className="circle" onClick={toggleMute}>
+                <div className="circle cursor-pointer" onClick={toggleMute}>
                   {isMuted ? (
                     <IoVolumeMute size={20} />
                   ) : (
